@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -151,13 +152,8 @@ func Infof(format string, a ...interface{}) {
 func Infov(v ...interface{}) {
 	out := []string{}
 	for _, value := range v {
-		yam, err := SPrintYAML(value)
-		if err != nil {
-			Error(err)
-			Fatal(value)
-			return
-		}
-		out = append(out, yam)
+		s := fmt.Sprintf("%s: %v", reflect.TypeOf(value).String(), value)
+		out = append(out, s)
 	}
 	Info(strings.Join(out, ","))
 }

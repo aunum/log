@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -148,14 +147,9 @@ func Infof(format string, a ...interface{}) {
 	}
 }
 
-// Infov prints values in a k:v fromat.
-func Infov(v ...interface{}) {
-	out := []string{}
-	for _, value := range v {
-		s := fmt.Sprintf("%s: %v", reflect.TypeOf(value).String(), value)
-		out = append(out, s)
-	}
-	Info(strings.Join(out, ","))
+// Infov prints value in a k:v fromat.
+func Infov(name string, value interface{}) {
+	Infof("%s: %v", name, value)
 }
 
 // Infoy prints the YAML represtation of an object at Info level.

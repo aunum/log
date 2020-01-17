@@ -83,6 +83,21 @@ func Fataly(name string, obj interface{}) {
 	Fatalf("%s >> \n\n%s\n", name, yam)
 }
 
+// Fatalv prints values in a k:v fromat and then exists with code 1.
+func Fatalv(v ...interface{}) {
+	out := []string{}
+	for _, value := range v {
+		yam, err := SPrintYAML(value)
+		if err != nil {
+			Error(err)
+			Fatal(value)
+			return
+		}
+		out = append(out, yam)
+	}
+	Fatal(strings.Join(out, ","))
+}
+
 // Fatal logs Error message then exits with code 1.
 func Fatal(a ...interface{}) {
 	Fatalf(buildFormat(a...), a...)
@@ -130,6 +145,21 @@ func Infof(format string, a ...interface{}) {
 		s := fmt.Sprintf(label(format, l), a...)
 		fmt.Fprintf(w, s)
 	}
+}
+
+// Infov prints values in a k:v fromat.
+func Infov(v ...interface{}) {
+	out := []string{}
+	for _, value := range v {
+		yam, err := SPrintYAML(value)
+		if err != nil {
+			Error(err)
+			Fatal(value)
+			return
+		}
+		out = append(out, yam)
+	}
+	Info(strings.Join(out, ","))
 }
 
 // Infoy prints the YAML represtation of an object at Info level.
@@ -269,22 +299,7 @@ func Warning(a ...interface{}) {
 
 // SPrintYAML returns a YAML string for an object and has support for proto messages.
 func SPrintYAML(a interface{}) (string, error) {
-	var b []byte
-	var err error
-	if m, ok := a.(proto.Message); ok {
-		marshaller := &jsonpb.Marshaler{}
-		var buf bytes.Buffer
-		err := marshaller.Marshal(&buf, m)
-		if err != nil {
-			return "", err
-		}
-		b = buf.Bytes()
-	} else {
-		b, err = json.Marshal(a)
-		if err != nil {
-			return "", err
-		}
-	}
+	b, err := MarshalJSON(a)
 	// doing yaml this way because at times you have nested proto structs
 	// that need to be cleaned.
 	yam, err := yamlconv.JSONToYAML(b)
@@ -292,6 +307,25 @@ func SPrintYAML(a interface{}) (string, error) {
 		return "", err
 	}
 	return string(yam), nil
+}
+
+// MarshalJSON marshals either a proto message or any other interface.
+func MarshalJSON(a interface{}) (b []byte, err error) {
+	if m, ok := a.(proto.Message); ok {
+		marshaller := &jsonpb.Marshaler{}
+		var buf bytes.Buffer
+		err = marshaller.Marshal(&buf, m)
+		if err != nil {
+			return
+		}
+		b = buf.Bytes()
+	} else {
+		b, err = json.Marshal(a)
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 // PrintYAML prints the YAML string of an object and has support for proto messages.
@@ -302,6 +336,13 @@ func PrintYAML(a interface{}) error {
 	}
 	fmt.Println(s)
 	return nil
+}
+
+// Check if an error is nil otherwise log fatal.
+func Check(err error) {
+	if err != nil {
+		Fatal(err)
+	}
 }
 
 func extractLoggerArgs(format string, a ...interface{}) ([]interface{}, io.Writer) {

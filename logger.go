@@ -149,7 +149,7 @@ func Infof(format string, a ...interface{}) {
 
 // Infov prints value in a k:v fromat.
 func Infov(name string, value interface{}) {
-	Infof("%s: %v", name, value)
+	Infof("%s: %v", keyf(name), value)
 }
 
 // Infoy prints the YAML represtation of an object at Info level.
@@ -285,6 +285,10 @@ func Warningy(name string, obj interface{}) {
 // Warning message.
 func Warning(a ...interface{}) {
 	Warningf(buildFormat(a...), a...)
+}
+
+func keyf(key string) string {
+	return color.HiBlueString(key)
 }
 
 // SPrintYAML returns a YAML string for an object and has support for proto messages.

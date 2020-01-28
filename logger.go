@@ -287,6 +287,11 @@ func Warning(a ...interface{}) {
 	Warningf(buildFormat(a...), a...)
 }
 
+// Break prints a break in the logs.
+func Break() {
+	fmt.Println("-------")
+}
+
 func keyf(key string) string {
 	return color.HiBlueString(key)
 }

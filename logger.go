@@ -152,6 +152,11 @@ func Infov(name string, value interface{}) {
 	Infof("%s: %v", keyf(name), value)
 }
 
+// Infovb prints value in a k:v fromat with the value on a new line.
+func Infovb(name string, value interface{}) {
+	Infof("%s: %v", keyf(name), value)
+}
+
 // Infoy prints the YAML represtation of an object at Info level.
 func Infoy(name string, obj interface{}) {
 	yam, err := SPrintYAML(obj)

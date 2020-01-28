@@ -289,7 +289,7 @@ func Warning(a ...interface{}) {
 
 // Break prints a break in the logs.
 func Break() {
-	fmt.Println("-------")
+	fmt.Println(color.MagentaString("-------"))
 }
 
 func keyf(key string) string {

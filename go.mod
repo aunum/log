@@ -1,4 +1,4 @@
-module github.com/pbarker/logger
+module github.com/pbarker/log
 
 go 1.13
 

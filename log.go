@@ -1,4 +1,4 @@
-package logger
+package log
 
 import (
 	"bytes"
@@ -294,7 +294,22 @@ func Warning(a ...interface{}) {
 
 // Break prints a break in the logs.
 func Break() {
-	fmt.Println(color.MagentaString("-------"))
+	fmt.Println(color.HiMagentaString("-------"))
+}
+
+// BreakHard prints a hard break in the logs.
+func BreakHard() {
+	fmt.Println(color.CyanString("========"))
+}
+
+// BreakStar prints a star break in the logs.
+func BreakStar() {
+	fmt.Println(color.RedString("*********"))
+}
+
+// BreakPound prints a pound break in the logs.
+func BreakPound() {
+	fmt.Println(color.HiBlueString("#########"))
 }
 
 func keyf(key string) string {

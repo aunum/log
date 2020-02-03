@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -67,7 +68,8 @@ func Fatalf(format string, a ...interface{}) {
 			l = color.RedString(l)
 		}
 		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
+		_, file, no, _ := runtime.Caller(1)
+		fmt.Fprintf(w, fmt.Sprintf("%s\n        called from %s#%d\n", s, file, no))
 		os.Exit(1)
 	}
 }

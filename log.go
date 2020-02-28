@@ -16,20 +16,20 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-// Logger creates a new instance of a logger.
-type Logger func(format string, a ...interface{})
+// Level is a log level.
+type Level int
 
 const (
 	// ErrorLevel logging.
-	ErrorLevel = 1
+	ErrorLevel Level = 1
 	// WarningLevel logging.
-	WarningLevel = 2
+	WarningLevel Level = 2
 	// InfoLevel logging.
-	InfoLevel = 3
+	InfoLevel Level = 3
 	// DebugLevel logging.
-	DebugLevel = 4
+	DebugLevel Level = 4
 	// DumpLevel logging.
-	DumpLevel = 5
+	DumpLevel Level = 5
 )
 
 const (
@@ -48,8 +48,8 @@ const (
 )
 
 var (
-	// Level to log at. Defaults to info level.
-	Level = InfoLevel
+	// GlobalLevel to log at. Defaults to info level.
+	GlobalLevel = InfoLevel
 	// Color should be enabled for logs.
 	Color = true
 	// TestMode is enabled.
@@ -60,18 +60,22 @@ var (
 
 // Fatalf message logs formatted Error then exits with code 1.
 func Fatalf(format string, a ...interface{}) {
-	if Level >= ErrorLevel {
-		a, w := extractLoggerArgs(format, a...)
-		l := ErrorLabel
-		if Color {
-			w = color.Output
-			l = color.RedString(l)
-		}
-		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
-		debug.PrintStack()
-		os.Exit(1)
+	if GlobalLevel >= ErrorLevel {
+		fatalf(Timestamps, Color, format, a...)
 	}
+}
+
+func fatalf(timestamps, colored bool, format string, a ...interface{}) {
+	a, w := extractLoggerArgs(format, a...)
+	l := ErrorLabel
+	if colored {
+		w = color.Output
+		l = color.RedString(l)
+	}
+	s := fmt.Sprintf(label(format, l, timestamps), a...)
+	fmt.Fprintf(w, s)
+	debug.PrintStack()
+	os.Exit(1)
 }
 
 // Fataly prints the YAML represtation of an object at Error level then exits with code 1.
@@ -107,16 +111,20 @@ func Fatal(a ...interface{}) {
 
 // Errorf is a formatted Error message.
 func Errorf(format string, a ...interface{}) {
-	if Level >= ErrorLevel {
-		a, w := extractLoggerArgs(format, a...)
-		l := ErrorLabel
-		if Color {
-			w = color.Output
-			l = color.RedString(l)
-		}
-		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
+	if GlobalLevel >= ErrorLevel {
+		errorf(Timestamps, Color, format, a...)
 	}
+}
+
+func errorf(timestamps, colored bool, format string, a ...interface{}) {
+	a, w := extractLoggerArgs(format, a...)
+	l := ErrorLabel
+	if colored {
+		w = color.Output
+		l = color.RedString(l)
+	}
+	s := fmt.Sprintf(label(format, l, timestamps), a...)
+	fmt.Fprintf(w, s)
 }
 
 // Errorv prints value in a k:v fromat.
@@ -147,16 +155,20 @@ func Error(a ...interface{}) {
 
 // Infof is a formatted Info message.
 func Infof(format string, a ...interface{}) {
-	if Level >= InfoLevel {
-		a, w := extractLoggerArgs(format, a...)
-		l := InfoLabel
-		if Color {
-			w = color.Output
-			l = color.CyanString(l)
-		}
-		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
+	if GlobalLevel >= InfoLevel {
+		infof(Timestamps, Color, format, a...)
 	}
+}
+
+func infof(timestamps, colored bool, format string, a ...interface{}) {
+	a, w := extractLoggerArgs(format, a...)
+	l := InfoLabel
+	if colored {
+		w = color.Output
+		l = color.CyanString(l)
+	}
+	s := fmt.Sprintf(label(format, l, timestamps), a...)
+	fmt.Fprintf(w, s)
 }
 
 // Infov prints value in a k:v fromat.
@@ -187,16 +199,20 @@ func Info(a ...interface{}) {
 
 // Successf is a formatted Success message.
 func Successf(format string, a ...interface{}) {
-	if Level >= InfoLevel {
-		a, w := extractLoggerArgs(format, a...)
-		l := SuccessLabel
-		if Color {
-			w = color.Output
-			l = color.HiGreenString(l)
-		}
-		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
+	if GlobalLevel >= InfoLevel {
+		successf(Timestamps, Color, format, a...)
 	}
+}
+
+func successf(timestamps, colored bool, format string, a ...interface{}) {
+	a, w := extractLoggerArgs(format, a...)
+	l := SuccessLabel
+	if colored {
+		w = color.Output
+		l = color.HiGreenString(l)
+	}
+	s := fmt.Sprintf(label(format, l, timestamps), a...)
+	fmt.Fprintf(w, s)
 }
 
 // Successv prints value in a k:v fromat.
@@ -227,16 +243,20 @@ func Success(a ...interface{}) {
 
 // Debugf is a formatted Debug message.
 func Debugf(format string, a ...interface{}) {
-	if Level >= DebugLevel {
-		a, w := extractLoggerArgs(format, a...)
-		l := DebugLabel
-		if Color {
-			w = color.Output
-			l = color.MagentaString(l)
-		}
-		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
+	if GlobalLevel >= DebugLevel {
+		debugf(Timestamps, Color, format, a...)
 	}
+}
+
+func debugf(timestamps, colored bool, format string, a ...interface{}) {
+	a, w := extractLoggerArgs(format, a...)
+	l := DebugLabel
+	if colored {
+		w = color.Output
+		l = color.MagentaString(l)
+	}
+	s := fmt.Sprintf(label(format, l, timestamps), a...)
+	fmt.Fprintf(w, s)
 }
 
 // Debugv prints value in a k:v fromat.
@@ -267,16 +287,20 @@ func Debug(a ...interface{}) {
 
 // Dumpf is a formatted Dump message.
 func Dumpf(format string, a ...interface{}) {
-	if Level >= DumpLevel {
-		a, w := extractLoggerArgs(format, a...)
-		l := DumpLabel
-		if Color {
-			w = color.Output
-			l = color.BlueString(l)
-		}
-		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
+	if GlobalLevel >= DumpLevel {
+		dumpf(Timestamps, Color, format, a...)
 	}
+}
+
+func dumpf(timestamps, colored bool, format string, a ...interface{}) {
+	a, w := extractLoggerArgs(format, a...)
+	l := DumpLabel
+	if colored {
+		w = color.Output
+		l = color.BlueString(l)
+	}
+	s := fmt.Sprintf(label(format, l, timestamps), a...)
+	fmt.Fprintf(w, s)
 }
 
 // Dumpv prints value in a k:v fromat.
@@ -306,16 +330,20 @@ func Dump(a ...interface{}) {
 
 // Warningf is a formatted Warning message.
 func Warningf(format string, a ...interface{}) {
-	if Level >= WarningLevel {
-		a, w := extractLoggerArgs(format, a...)
-		l := WarningLabel
-		if Color {
-			w = color.Output
-			l = color.HiYellowString(l)
-		}
-		s := fmt.Sprintf(label(format, l), a...)
-		fmt.Fprintf(w, s)
+	if GlobalLevel >= WarningLevel {
+		warningf(Timestamps, Color, format, a...)
 	}
+}
+
+func warningf(timestamps, colored bool, format string, a ...interface{}) {
+	a, w := extractLoggerArgs(format, a...)
+	l := WarningLabel
+	if colored {
+		w = color.Output
+		l = color.HiYellowString(l)
+	}
+	s := fmt.Sprintf(label(format, l, timestamps), a...)
+	fmt.Fprintf(w, s)
 }
 
 // Warningv prints value in a k:v fromat.
@@ -430,8 +458,8 @@ func extractLoggerArgs(format string, a ...interface{}) ([]interface{}, io.Write
 	return a, w
 }
 
-func label(format, label string) string {
-	if Timestamps {
+func label(format, label string, timestamps bool) string {
+	if timestamps {
 		return labelWithTime(format, label)
 	}
 	return labelWithoutTime(format, label)

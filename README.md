@@ -1,3 +1,3 @@
-# logger
+# log
 
-A simple logger.
+A simple logger for Go with rich data structure support.

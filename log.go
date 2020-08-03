@@ -74,7 +74,6 @@ func fatalf(timestamps, colored bool, format string, a ...interface{}) {
 	}
 	s := fmt.Sprintf(label(format, l, timestamps), a...)
 	fmt.Fprintf(w, s)
-	debug.PrintStack()
 	os.Exit(1)
 }
 
